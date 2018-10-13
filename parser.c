@@ -93,7 +93,9 @@ int parse_stmt(TokenList** current_pos, Ast* head){
 
   Token* curr = (*current_pos)->val;
 
-  for(;;){
+  int stop = 0;
+  
+  while( !stop ) {
     printf("\nStatement token: ");
     token_str(curr);
     fflush(stdout);
@@ -118,6 +120,7 @@ int parse_stmt(TokenList** current_pos, Ast* head){
     }
       
     switch(curr->type){
+      
     case TOKEN_NUM:
       push(operands, ast_num(curr->meta));
       break;
@@ -192,24 +195,17 @@ int parse_stmt(TokenList** current_pos, Ast* head){
         fflush(stdout);
       }
       break;
-      
-    case TOKEN_EOF:
-      break;
-    }
-    
-    if(curr->type==TOKEN_EOF){
-      printf("\nFor some reason we ended here\n");
-      fflush(stdout);
-      break;
-    }
-    printf("\nGot past the if\n");
-    fflush(stdout);
-    
-    *current_pos = (*current_pos)->next;
-    curr = (*current_pos)->val;
 
-    printf("\nNext is gonna be token: %s", curr->meta);
-    fflush(stdout);
+    default:
+      stop = 1;
+      break;
+    }
+
+    // If we stopped parsing because we hit a semicolon, skip it
+    if(!stop || stop && (curr->type == TOKEN_SC)){
+      *current_pos = (*current_pos)->next;
+      curr = (*current_pos)->val;
+    }    
   }
 
   printf("\nAbout to commence popping remaining operators\n");

@@ -13,6 +13,8 @@ char* token_t_str(Token_t type){
   case TOKEN_BINOP: return "BINOP";
   case TOKEN_LP: return "(";
   case TOKEN_RP: return ")";
+  case TOKEN_SC: return ";";
+  case TOKEN_ASSN: return "=";
   }
   return "";
 }

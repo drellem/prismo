@@ -10,6 +10,7 @@
 void lex_id(char, char*, Token*, int*);
 void lex_num(char, char*, Token*, int*);
 int  isbinop(char);
+void check_kwd(Token*);
 
 TokenList* lex(char* c){
   TokenList* retList = NULL;
@@ -28,6 +29,7 @@ TokenList* lex(char* c){
         continue;
     } else if(isalpha(c[index])) {
       lex_id(c[index], c, ret, &index);
+      check_kwd(ret);
     } else if(isdigit(c[index])){
       lex_num(c[index], c, ret, &index);
     } else if(c[index]=='('){
@@ -37,6 +39,14 @@ TokenList* lex(char* c){
     } else if(c[index]==')'){
       ret->type = TOKEN_RP;
       ret->meta[0] = ')';
+      ret->meta[1] = '\0';
+    } else if(c[index]==';'){
+      ret->type = TOKEN_SC;
+      ret->meta[0] = ';';
+      ret->meta[1] = '\0';
+    } else if(c[index]=='='){
+      ret->type = TOKEN_ASSN;
+      ret->meta[0] = '=';
       ret->meta[1] = '\0';
     } else if(isbinop(c[index])){
       ret->type = TOKEN_BINOP;
@@ -77,7 +87,8 @@ void lex_num(char fst, char* in, Token* ret, int* index_ref){
         ret->meta[i] = '\0';
         return;
       } else {
-        ret->meta[i] = tmp;      }
+        ret->meta[i] = tmp;
+      }
     } else {
       (*index_ref)--;
       ret->meta[i] = '\0';
@@ -114,4 +125,10 @@ void lex_id(char fst, char* in, Token* ret, int* index_ref){
 
 int isbinop(char c){
   return c=='+' || c == '-' || c == '*' || c == '/';
+}
+
+void check_kwd(Token* tok){
+  if( !strcmp(tok->meta, "var") ){
+    tok->type = TOKEN_VAR;
+  }
 }

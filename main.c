@@ -8,7 +8,7 @@
 
 int main(){
 
-  char* prog = "3*(2+1)-5";
+  char* prog = "3*(2+1)-5;2+7;";
   
   TokenList* tok_list = lex(prog);
 
@@ -22,7 +22,7 @@ int main(){
 
   
 
-  /*  Token* id = malloc(sizeof(Token));
+  /*  Token* id = malloc(sizeof(Token));                               
   id-> type = TOKEN_ID;
   strcpy(id->meta, "APPLE"); */
 

@@ -20,7 +20,8 @@ Ast* ast_binop(char*);
 Ast* ast_lp();
 
 enum Token_t_enum { TOKEN_EOF, TOKEN_ID, TOKEN_NUM, TOKEN_BINOP,
-                    TOKEN_LP,  TOKEN_RP };
+                    TOKEN_LP,  TOKEN_RP, TOKEN_SC, TOKEN_ASSN,
+                    TOKEN_VAR  };
 
 typedef enum Token_t_enum Token_t;
   
