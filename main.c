@@ -8,12 +8,9 @@
 
 int main(){
 
-  char* prog = "3*(2+1)-5;2+7;";
+  char* prog = "var a = 4; var alpha = 5+(7*6);";
   
   TokenList* tok_list = lex(prog);
-
-  printf("\nToken list is %s\n", token_str(tok_list->val));
-  fflush(stdout);
                                                              
 
   Ast* ast = parse(tok_list, ((Ast*)NULL));

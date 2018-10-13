@@ -15,6 +15,7 @@ char* token_t_str(Token_t type){
   case TOKEN_RP: return ")";
   case TOKEN_SC: return ";";
   case TOKEN_ASSN: return "=";
+  case TOKEN_VAR: return "var";
   }
   return "";
 }
@@ -205,6 +206,28 @@ Ast* ast_lp(){
   return ast;
 }
 
+char* ast_t_str(Ast_t type){
+  switch(type){
+  case AST_HEAD:
+      return "HEAD";
+  case AST_EOF:
+    return "EOF";
+  case AST_NUM:
+    return "NUM";
+  case AST_ID:
+    return "ID";
+  case AST_BINOP:
+    return "BINOP";
+  case AST_LP:
+    return "(";
+  case AST_VAR:
+    return "VAR";
+  default:
+    return "";
+  }
+}
+  
+
 void printAst(Ast* ast, int depth){
   int i;
   for(i =  0; i < depth; i++){
@@ -213,7 +236,7 @@ void printAst(Ast* ast, int depth){
   if(ast->meta==NULL)
     printf("No meta\n");
   else
-    printf("%s\n", ast->meta);
+    printf("%s:%s\n", ast_t_str(ast->type), ast->meta);
   fflush(stdout);
   AstList* child = ast->children;
   while(child!=NULL && child->val!=NULL){

@@ -4,7 +4,7 @@
 #define TOKEN_META_MAX_LEN 51
 
 enum Ast_t_enum { AST_HEAD, AST_EOF, AST_NUM, AST_ID, AST_BINOP,
-                  AST_LP };
+                  AST_LP, AST_VAR };
 
 typedef enum Ast_t_enum Ast_t;
 

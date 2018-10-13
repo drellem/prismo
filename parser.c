@@ -9,6 +9,7 @@
 // Parse functions return NULL if they fail
 
 int parse_stmt(TokenList**, Ast*);
+int parse_val(TokenList**, Ast*);
 int precedence(Ast*);
 int left_assoc(Ast*);
 
@@ -64,6 +65,88 @@ Ast* parse(TokenList* tokens, Ast* head){
   return head;
 }
 
+int parse_stmt(TokenList** current_pos, Ast* head){
+  if((*current_pos)==NULL){
+    printf("\nUnexpected EOF end of token stream.\n");
+    fflush(stdout);
+    return 0;
+  }
+
+  Token* curr = (*current_pos)->val;
+
+  switch(curr->type){
+  case TOKEN_VAR:
+    *current_pos = (*current_pos)->next;
+    return parse_var(current_pos, head);
+  case TOKEN_SC:
+    *current_pos = (*current_pos)->next;
+    return 1;
+  case EOF:
+    return 0;
+  default:
+    printf("\nError parsing statement. Unrecognized token:\n");
+    token_str(curr);
+    return 0;
+  }
+  
+}
+
+int parse_var(TokenList** current_pos, Ast* head){
+  Ast* result;
+
+  if((*current_pos)==NULL){
+    printf("\nError unexpected EOF end of token stream while parsing 'var'.\n");
+    fflush(stdout);
+    return 0;
+  }
+
+  if(!(result = malloc(sizeof(Ast)))){
+    printf("\nError allocating memory\n");
+    return 0;
+  }
+
+  result->type = AST_VAR;
+  result->children = astEmptyList();
+
+  Token* var_name_token = (*current_pos)->val;
+
+  if(var_name_token->type != TOKEN_ID){
+    printf("\nError parsing var. Expected var ID but found token:");
+    token_str(var_name_token);
+    return 0;
+  }
+
+  result->meta = var_name_token->meta;
+
+  *current_pos = (*current_pos)->next;
+
+  Token* eq_token = (*current_pos)->val;
+
+  if(eq_token==NULL){
+    if((*current_pos)==NULL){
+      printf("\nError unexpected EOF end of token stream while parsing 'var'.\n");
+      fflush(stdout);
+      return 0;
+    }
+  }
+
+  if(eq_token->type!=TOKEN_ASSN){
+    printf("\nError, expected token '=' in var ID '=' ... but found token:");
+    token_str(eq_token);
+  }
+
+  *current_pos = (*current_pos)->next;
+
+  int success = parse_expr(current_pos, result);
+
+  if(success){
+    astAppendToTail(head->children, result);
+  }
+  
+  return success;
+  
+}
+
 
 /*
   This looks heinous but it's just the Shunting Yard algorithm.
@@ -72,7 +155,7 @@ Ast* parse(TokenList* tokens, Ast* head){
   position in the token stream. The position is reset upon failure of a substep.
  */
 
-int parse_stmt(TokenList** current_pos, Ast* head){
+int parse_expr(TokenList** current_pos, Ast* head){
   Ast* result;
   AstStack* operands = createStack();
   AstStack* operators = createStack();
