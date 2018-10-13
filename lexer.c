@@ -30,6 +30,14 @@ TokenList* lex(char* c){
       lex_id(c[index], c, ret, &index);
     } else if(isdigit(c[index])){
       lex_num(c[index], c, ret, &index);
+    } else if(c[index]=='('){
+      ret->type = TOKEN_LP;
+      ret->meta[0] = '(';
+      ret->meta[1] = '\0';
+    } else if(c[index]==')'){
+      ret->type = TOKEN_RP;
+      ret->meta[0] = ')';
+      ret->meta[1] = '\0';
     } else if(isbinop(c[index])){
       ret->type = TOKEN_BINOP;
       ret->meta[0] = c[index];

@@ -64,6 +64,14 @@ Ast* parse(TokenList* tokens, Ast* head){
   return head;
 }
 
+
+/*
+  This looks heinous but it's just the Shunting Yard algorithm.
+
+  The code is designed procedurally so that each parsing substep updates the current
+  position in the token stream. The position is reset upon failure of a substep.
+ */
+
 int parse_stmt(TokenList** current_pos, Ast* head){
   Ast* result;
   AstStack* operands = createStack();
@@ -85,17 +93,27 @@ int parse_stmt(TokenList** current_pos, Ast* head){
 
   Token* curr = (*current_pos)->val;
 
-
   for(;;){
-    printf("\nStatement token %s\n", token_str(curr));
+    printf("\nStatement token: ");
+    token_str(curr);
     fflush(stdout);
+
+    printf("\nOperands:\n");
+    printAstStack(operands);
+
+    printf("\nOperators:\n");
+    printAstStack(operators);
+
+    printf("\nToken List;\n");
+    printTokenList(*current_pos);
     
     if(curr==NULL){
       printf("\nReached end of file\n");
       fflush(stdout);
 
-      printf("\nToken is %s\n", token_str(curr));
-      fflush(stdout);
+      printf("\nToken is\n");
+      token_str(curr);
+     
       return 0;
     }
       
@@ -133,14 +151,65 @@ int parse_stmt(TokenList** current_pos, Ast* head){
           push(operators, ast_curr);
         }
       }
+      break;
+      
+    case TOKEN_LP:
+      push(operators, ast_lp());
+
+      printf("\nSuccessfully pushed the LP\n");
+      break;
+        
+    case TOKEN_RP:
+      { 
+        Ast* curr_op = pop(operators);
+        while(curr_op!=NULL && curr_op->type != AST_LP){
+          printf("\nBeginning with the operator %s\n", curr_op->meta);
+          fflush(stdout);
+          Ast* node1 = pop(operands);
+          Ast* node2 = pop(operands);
+          if(node1!=NULL)
+            printf("\nUsing node1 %s", node1->meta);
+          fflush(stdout);
+          if(node2!=NULL)
+            printf("\nUsing node2 %s", node2->meta);
+          fflush(stdout);
+          if( node1==NULL || node2==NULL ){
+            printf("\nError parsing statement. Mismatched operators and operands in parentheses.\n");
+            fflush(stdout);
+            return 0;
+          }
+          curr_op->children = astAppendToHead(curr_op->children, node1);
+          curr_op->children = astAppendToHead(curr_op->children, node2);
+          push(operands, curr_op);
+          curr_op = pop(operators);
+        }
+        if( curr_op==NULL ){
+          printf("\nError parsing statement. Mismatched parentheses.\n");
+          fflush(stdout);
+          return 0;
+        }
+        printf("\nFinished parsing parentheses\n");
+        fflush(stdout);
+      }
+      break;
+      
     case TOKEN_EOF:
       break;
     }
+    
     if(curr->type==TOKEN_EOF){
+      printf("\nFor some reason we ended here\n");
+      fflush(stdout);
       break;
     }
+    printf("\nGot past the if\n");
+    fflush(stdout);
+    
     *current_pos = (*current_pos)->next;
     curr = (*current_pos)->val;
+
+    printf("\nNext is gonna be token: %s", curr->meta);
+    fflush(stdout);
   }
 
   printf("\nAbout to commence popping remaining operators\n");
@@ -181,6 +250,7 @@ int parse_stmt(TokenList** current_pos, Ast* head){
   printf("\nAbout to free the data\n");
   fflush(stdout);
   //Now clean up any operators left in the stack
+  
   free(operands);
   free(operators);
 
@@ -190,14 +260,14 @@ int parse_stmt(TokenList** current_pos, Ast* head){
   return 1;
 }
 
-int precedence(Ast* binop){
-  if(binop==NULL){
+int precedence(Ast* op){
+  if(op==NULL || !strcmp(op->meta, "(")){
     return 0;
   }
-  if(!strcmp(binop->meta, "+") || !strcmp(binop->meta, "-")){
+  if(!strcmp(op->meta, "+") || !strcmp(op->meta, "-")){
     return 1;
   }
-  if(!strcmp(binop->meta, "*") || !strcmp(binop->meta, "/")){
+  if(!strcmp(op->meta, "*") || !strcmp(op->meta, "/")){
     return 2;
   }
 }

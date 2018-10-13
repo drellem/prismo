@@ -6,11 +6,9 @@
 #include "ast.h"
 
 
-void printAst(Ast*, int);
-
 int main(){
 
-  char* prog = "3-2-1";
+  char* prog = "3*(2+1)-5";
   
   TokenList* tok_list = lex(prog);
 
@@ -37,20 +35,3 @@ int main(){
     
   freeList(tok_list);
 }
-
-
-void printAst(Ast* ast, int depth){
-  int i;
-  for(i =  0; i < depth; i++){
-    printf("\t");
-  }
-  printf("%s\n", ast->meta);
-  fflush(stdout);
-  AstList* child = ast->children;
-  while(child!=NULL && child->val!=NULL){
-    fflush(stdout);
-    printAst(child->val, depth+1);
-    child = child->next;
-  }
-}
-
